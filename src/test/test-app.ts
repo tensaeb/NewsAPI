@@ -241,6 +241,7 @@ export type TestHarness = {
   readLogs: InMemoryReadLogRepository;
   daily: InMemoryDailyAnalyticsRepository;
   aggregation: AnalyticsAggregationService;
+  tokens: JwtTokenService;
 };
 
 export function createTestHarness(): TestHarness {
@@ -281,5 +282,5 @@ export function createTestHarness(): TestHarness {
     shutdown: async () => {},
   } satisfies AppContainer;
 
-  return { app: createApp(container), users, articles, readLogs, daily, aggregation };
+  return { app: createApp(container), users, articles, readLogs, daily, aggregation, tokens };
 }
