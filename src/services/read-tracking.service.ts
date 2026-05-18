@@ -15,6 +15,12 @@ export class ReadTrackingService implements IReadTrackingService {
     private readonly env: Pick<AppEnv, "READ_DEDUP_SECONDS">,
   ) {}
 
+  /**
+   * Technical Trade-off: Non-blocking read tracking.
+   * We use setImmediate to process the read log asynchronously.
+   * This ensures the article content is served to the reader immediately
+   * without waiting for database writes, maximizing API responsiveness.
+   */
   enqueueRead(params: { articleId: string; readerId: string | null }): void {
     setImmediate(() => {
       void this.record(params).catch((err) => {
