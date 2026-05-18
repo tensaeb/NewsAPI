@@ -45,12 +45,10 @@ export class AnalyticsJobScheduler implements IAnalyticsJobScheduler {
     });
 
     // Runs daily at 00:15 UTC (GMT) and aggregates the previous UTC calendar day.
-    await this.boss.schedule(
-      DAILY_ANALYTICS_QUEUE,
-      "15 0 * * *",
-      { dayISO: previousUtcCalendarDayISO() },
-      { tz: "UTC" },
-    );
+    // Note: We don't pass dayISO in the static schedule payload because pg-boss
+    // uses the initial payload for all subsequent runs.
+    // Instead, the worker logic uses previousUtcCalendarDayISO() if dayISO is missing.
+    await this.boss.schedule(DAILY_ANALYTICS_QUEUE, "15 0 * * *", {}, { tz: "UTC" });
   }
 
   async stop(): Promise<void> {

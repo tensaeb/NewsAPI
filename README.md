@@ -146,7 +146,8 @@ await container.analyticsScheduler.enqueueDay("2026-05-17");
 
 1. **Non-blocking:** `ReadTrackingService.enqueueRead` uses `setImmediate` so the HTTP response is not delayed by DB writes.
 2. **Logged-in dedup:** Within `READ_DEDUP_SECONDS`, the same `readerId + articleId` does not create another `ReadLog`.
-3. **Further hardening (not fully implemented):** guest dedup via hashed IP + article, rate limiting (e.g. Redis), or client session id.
+3. **Guest dedup (IP-based):** For unauthenticated readers, we use the requester's IP address to deduplicate reads within the same `READ_DEDUP_SECONDS` window. This prevents a guest from inflating view counts by repeatedly refreshing.
+4. **Further hardening:** Additional layers like rate limiting at the load balancer or using client-side session IDs could further refine this.
 
 ## Scripts
 
