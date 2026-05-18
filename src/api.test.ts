@@ -162,8 +162,18 @@ describe("News API — all HTTP routes (mocked database)", () => {
     });
 
     it("records guest read when no JWT is provided", async () => {
+      const fresh = await request(harness.app)
+        .post("/articles")
+        .set("Authorization", `Bearer ${authorToken}`)
+        .send({
+          title: "Guest read probe",
+          content: VALID_CONTENT,
+          category: "Tech",
+          status: ArticleStatus.Published,
+        });
+      const freshId = fresh.body.Object.article.id;
       const before = harness.readLogs.logs.length;
-      const res = await request(harness.app).get(`/articles/${articleId}`);
+      const res = await request(harness.app).get(`/articles/${freshId}`);
       expect(res.status).toBe(200);
       await new Promise((r) => setImmediate(r));
       expect(harness.readLogs.logs.length).toBeGreaterThan(before);
@@ -189,6 +199,27 @@ describe("News API — all HTTP routes (mocked database)", () => {
       await request(harness.app)
         .get(`/articles/${freshId}`)
         .set("Authorization", `Bearer ${readerToken}`);
+      await new Promise((r) => setTimeout(r, 30));
+
+      expect(harness.readLogs.logs.length).toBe(before + 1);
+    });
+
+    it("deduplicates rapid reads for the same guest IP", async () => {
+      const created = await request(harness.app)
+        .post("/articles")
+        .set("Authorization", `Bearer ${authorToken}`)
+        .send({
+          title: "Guest Dedup probe",
+          content: VALID_CONTENT,
+          category: "Health",
+          status: ArticleStatus.Published,
+        });
+      const freshId = created.body.Object.article.id as string;
+      const before = harness.readLogs.logs.length;
+
+      // Mock IP is not easily set via supertest but we can test the service or rely on default behavior
+      await request(harness.app).get(`/articles/${freshId}`);
+      await request(harness.app).get(`/articles/${freshId}`);
       await new Promise((r) => setTimeout(r, 30));
 
       expect(harness.readLogs.logs.length).toBe(before + 1);

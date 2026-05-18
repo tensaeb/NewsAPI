@@ -63,9 +63,17 @@ export interface IArticleRepository {
 }
 
 export interface IReadLogRepository {
-  create(params: { articleId: string; readerId: string | null }): Promise<void>;
-  hasRecentRead(params: { articleId: string; readerId: string; since: Date }): Promise<boolean>;
-  countGroupedByArticleForInterval(params: { start: Date; end: Date }): Promise<{ articleId: string; count: number }[]>;
+  create(params: { articleId: string; readerId: string | null; readerIp?: string | null }): Promise<void>;
+  hasRecentRead(params: {
+    articleId: string;
+    readerId?: string | null;
+    readerIp?: string | null;
+    since: Date;
+  }): Promise<boolean>;
+  countGroupedByArticleForInterval(params: {
+    start: Date;
+    end: Date;
+  }): Promise<{ articleId: string; count: number }[]>;
 }
 
 export interface IDailyAnalyticsRepository {

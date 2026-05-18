@@ -174,19 +174,23 @@ class InMemoryArticleRepository implements IArticleRepository {
 }
 
 class InMemoryReadLogRepository implements IReadLogRepository {
-  logs: { articleId: string; readerId: string | null; readAt: Date }[] = [];
+  logs: { articleId: string; readerId: string | null; readerIp?: string | null; readAt: Date }[] = [];
 
-  async create(params: { articleId: string; readerId: string | null }) {
+  async create(params: { articleId: string; readerId: string | null; readerIp?: string | null }) {
     this.logs.push({ ...params, readAt: new Date() });
   }
 
-  async hasRecentRead(params: { articleId: string; readerId: string; since: Date }) {
-    return this.logs.some(
-      (l) =>
-        l.articleId === params.articleId &&
-        l.readerId === params.readerId &&
-        l.readAt >= params.since,
-    );
+  async hasRecentRead(params: {
+    articleId: string;
+    readerId?: string | null;
+    readerIp?: string | null;
+    since: Date;
+  }) {
+    return this.logs.some((l) => {
+      const matchId = params.readerId ? l.readerId === params.readerId : true;
+      const matchIp = params.readerIp ? l.readerIp === params.readerIp : true;
+      return l.articleId === params.articleId && l.readAt >= params.since && matchId && matchIp;
+    });
   }
 
   async countGroupedByArticleForInterval(params: { start: Date; end: Date }) {

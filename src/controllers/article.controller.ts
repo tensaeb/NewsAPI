@@ -120,6 +120,7 @@ export class ArticleController {
       this.readTracking.enqueueRead({
         articleId: article.id,
         readerId: req.auth?.sub ?? null,
+        readerIp: req.ip,
       });
 
       res.status(200).json(okResponse("Article", { article }));

@@ -52,10 +52,12 @@ model ReadLog {
   article   Article  @relation(fields: [articleId], references: [id])
   readerId  String?
   reader    User?    @relation(fields: [readerId], references: [id])
+  readerIp  String?
   readAt    DateTime @default(now())
 
   @@index([articleId, readAt])
   @@index([readerId, articleId, readAt])
+  @@index([readerIp, articleId, readAt])
 }
 
 model DailyAnalytics {
